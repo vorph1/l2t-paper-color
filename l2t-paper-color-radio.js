@@ -1,10 +1,4 @@
-<link rel="import" href="../polymer/polymer.html">
-<link rel="import" href="../paper-behaviors/paper-checked-element-behavior.html">
-<link rel="import" href="../paper-styles/default-theme.html">
-<link rel="import" href="../iron-flex-layout/iron-flex-layout.html">
-<link rel="import" href="../iron-icons/iron-icons.html">
-
-<!--
+/**
 Material design: [Radio button](https://www.google.com/design/spec/components/selection-controls.html#selection-controls-radio-button)
 `l2t-paper-color-radio` is a button that can be either checked or unchecked.
 User can tap the radio button to check or uncheck it.
@@ -37,10 +31,24 @@ This element applies the mixin `--paper-font-common-base` but does not import `p
 In order to apply the `Roboto` font to this element, make sure you've imported `paper-styles/typography.html`.
 @group l2t Paper Elements
 @element l2t-paper-color-radio
--->
+*/
+/*
+  FIXME(polymer-modulizer): the above comments were extracted
+  from HTML and may be out of place here. Review them and
+  then delete this comment!
+*/
+import '../@polymer/polymer/polymer-legacy.js';
 
-<dom-module id="l2t-paper-color-radio">
-  <template strip-whitespace>
+import { PaperCheckedElementBehavior } from '../@polymer/paper-behaviors/paper-checked-element-behavior.js';
+import '../@polymer/paper-styles/default-theme.js';
+import '../@polymer/iron-flex-layout/iron-flex-layout.js';
+import '../@polymer/iron-icons/iron-icons.js';
+import { Polymer } from '../@polymer/polymer/lib/legacy/polymer-fn.js';
+import { afterNextRender } from '../@polymer/polymer/lib/utils/render-status.js';
+const $_documentContainer = document.createElement('template');
+
+$_documentContainer.innerHTML = `<dom-module id="l2t-paper-color-radio">
+  <template strip-whitespace="">
     <style>
       :host {
         display: inline-block;
@@ -50,7 +58,7 @@ In order to apply the `Roboto` font to this element, make sure you've imported `
         @apply --paper-font-common-base;
         --calculated-l2t-paper-color-radio-size: var(--l2t-paper-color-radio-size, 48px);
         --calculated-l2t-paper-color-icon-size: calc(var(--calculated-l2t-paper-color-radio-size)/2);
-        /* -1px is a sentinel for the default and is replace in `attached`. */
+        /* -1px is a sentinel for the default and is replace in \`attached\`. */
         --calculated-l2t-paper-color-radio-ink-size: var(--l2t-paper-color-radio-ink-size, -1px);
       }
       :host(:focus) {
@@ -141,94 +149,95 @@ In order to apply the `Roboto` font to this element, make sure you've imported `
     <div id="radioLabel"><slot></slot></div>
   </template>
 
-  <script>
-    Polymer({
-      is: 'l2t-paper-color-radio',
-      behaviors: [
-        Polymer.PaperCheckedElementBehavior
-      ],
-      hostAttributes: {
-        role: 'radio',
-        'aria-checked': false,
-        tabindex: 0
-      },
-      properties: {
-        /**
-         * Fired when the checked state changes due to user interaction.
-         *
-         * @event change
-         */
-        /**
-         * Fired when the checked state changes.
-         *
-         * @event iron-change
-         */
-        ariaActiveAttribute: {
-          type: String,
-          value: 'aria-checked'
-        },
-        /**
-        * color: string to store the color value
-        */
-        color: {
-          type: String,
-          value: '#3f51b5',
-          reflectToAttribute: true,
-          observer: '_colorUpdate'
-        },
-        /**
-        * icon: string to store iron-icon name for the check symbol
-        */
-        icon: {
-          type: String,
-          value: 'check'
+  
+</dom-module>`;
+
+document.head.appendChild($_documentContainer.content);
+Polymer({
+  is: 'l2t-paper-color-radio',
+  behaviors: [
+    PaperCheckedElementBehavior
+  ],
+  hostAttributes: {
+    role: 'radio',
+    'aria-checked': false,
+    tabindex: 0
+  },
+  properties: {
+    /**
+     * Fired when the checked state changes due to user interaction.
+     *
+     * @event change
+     */
+    /**
+     * Fired when the checked state changes.
+     *
+     * @event iron-change
+     */
+    ariaActiveAttribute: {
+      type: String,
+      value: 'aria-checked'
+    },
+    /**
+    * color: string to store the color value
+    */
+    color: {
+      type: String,
+      value: '#3f51b5',
+      reflectToAttribute: true,
+      observer: '_colorUpdate'
+    },
+    /**
+    * icon: string to store iron-icon name for the check symbol
+    */
+    icon: {
+      type: String,
+      value: 'check'
+    }
+  },
+  /**
+  * _colorUpdate: updates styles to match color
+  */
+  _colorUpdate: function() {
+    if(this._testColor()){
+      this.updateStyles({
+        '--l2t-paper-color-radio-ink-color': this.color,
+        '--l2t-paper-color-radio-color': this.color,
+      });
+    } else {
+      console.warn("l2t-paper-color-radio: "+this.color+" is not a valid color, using default");
+      this.color = "#3f51b5";
+    }
+  },
+  /**
+  * _testColor: returns true if this.color is valid
+  */
+  _testColor: function() {
+    var testDiv = document.createElement("div");
+    testDiv.style.color = this.color;
+    return testDiv.style.color != '';
+  },
+  ready: function() {
+    this._rippleContainer = this.$.radioContainer;
+  },
+  attached: function() {
+    // Wait until styles have resolved to check for the default sentinel.
+    // See polymer#4009 for more details.
+    afterNextRender(this, function() {
+      var inkSize = this.getComputedStyleValue('--calculated-l2t-paper-color-radio-ink-size').trim();
+      // If unset, compute and set the default `--l2t-paper-color-radio-ink-size`.
+      if (inkSize === '-1px') {
+        var size = parseFloat(this.getComputedStyleValue('--calculated-l2t-paper-color-radio-size').trim());
+        var defaultInkSize = Math.floor(1.6 * size);
+        // The button and ripple need to have the same parity so that their
+        // centers align.
+        if (defaultInkSize % 2 !== size % 2) {
+          defaultInkSize++;
         }
-      },
-      /**
-      * _colorUpdate: updates styles to match color
-      */
-      _colorUpdate: function() {
-        if(this._testColor()){
-          this.updateStyles({
-            '--l2t-paper-color-radio-ink-color': this.color,
-            '--l2t-paper-color-radio-color': this.color,
-          });
-        } else {
-          console.warn("l2t-paper-color-radio: "+this.color+" is not a valid color, using default");
-          this.color = "#3f51b5";
-        }
-      },
-      /**
-      * _testColor: returns true if this.color is valid
-      */
-      _testColor: function() {
-        var testDiv = document.createElement("div");
-        testDiv.style.color = this.color;
-        return testDiv.style.color != '';
-      },
-      ready: function() {
-        this._rippleContainer = this.$.radioContainer;
-      },
-      attached: function() {
-        // Wait until styles have resolved to check for the default sentinel.
-        // See polymer#4009 for more details.
-        Polymer.RenderStatus.afterNextRender(this, function() {
-          var inkSize = this.getComputedStyleValue('--calculated-l2t-paper-color-radio-ink-size').trim();
-          // If unset, compute and set the default `--l2t-paper-color-radio-ink-size`.
-          if (inkSize === '-1px') {
-            var size = parseFloat(this.getComputedStyleValue('--calculated-l2t-paper-color-radio-size').trim());
-            var defaultInkSize = Math.floor(1.6 * size);
-            // The button and ripple need to have the same parity so that their
-            // centers align.
-            if (defaultInkSize % 2 !== size % 2) {
-              defaultInkSize++;
-            }
-            this.updateStyles({
-              '--l2t-paper-color-radio-ink-size': defaultInkSize + 'px',
-            });
-          }
+        this.updateStyles({
+          '--l2t-paper-color-radio-ink-size': defaultInkSize + 'px',
         });
-      },
-    })
-  </script>
-</dom-module>
+      }
+    });
+  },
+})

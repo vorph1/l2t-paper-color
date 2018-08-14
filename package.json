@@ -1,0 +1,30 @@
+{
+  "description": "Dialogue box in a paper style for selecting colors",
+  "name": "l2t-paper-color",
+  "version": "3.0.0",
+  "resolutions": {
+    "inherits": "2.0.3",
+    "samsam": "1.1.3",
+    "supports-color": "3.1.2",
+    "type-detect": "1.0.0"
+  },
+  "main": "l2t-paper-color.js",
+  "license": "MIT",
+  "dependencies": {
+    "@polymer/polymer": "^3.0.0",
+    "@polymer/paper-radio-group": "^3.0.0-pre.18",
+    "@polymer/paper-slider": "^3.0.0-pre.18",
+    "@polymer/paper-behaviors": "^3.0.0-pre.18",
+    "@polymer/paper-styles": "^3.0.0-pre.18",
+    "@polymer/iron-flex-layout": "^3.0.0-pre.18",
+    "@polymer/iron-icons": "^3.0.0-pre.18",
+    "@polymer/paper-button": "^3.0.0-pre.18",
+    "@polymer/paper-dialog": "^3.0.0-pre.18",
+    "@polymer/paper-input": "^3.0.0-pre.18"
+  },
+  "devDependencies": {
+    "@polymer/iron-demo-helpers": "^3.0.0-pre.18",
+    "wct-browser-legacy": "^1.0.1",
+    "@webcomponents/webcomponentsjs": "^2.0.0"
+  }
+}

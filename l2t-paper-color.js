@@ -1,0 +1,168 @@
+/**
+l2t-paper-color is a polymer element to display a color selector in a paper style
+
+### Example:
+
+    <l2t-paper-color></l2t-paper-color>
+
+### Styling
+The following custom properties and mixins are available for styling:
+
+Custom property | Description | Default
+----------------|-------------|----------
+`--l2t-paper-color-width` | width of input | `120pxr`
+`--l2t-paper-color-indicator-icon` | style for color indicator (programmatically set) | `transparent`
+`--l2t-paper-color-indicator-icon-display` | display style for color indicator (programmatically set) | `none`
+
+@group l2t Paper Elements
+@element l2t-paper-color
+@demo demo/index.html
+*/
+/*
+  FIXME(polymer-modulizer): the above comments were extracted
+  from HTML and may be out of place here. Review them and
+  then delete this comment!
+*/
+import { PolymerElement } from '../@polymer/polymer/polymer-element.js';
+
+import '../@polymer/paper-input/paper-input.js';
+import '../@polymer/iron-icons/iron-icons.js';
+import '../@polymer/iron-icons/image-icons.js';
+import './l2t-paper-color-dialog.js';
+import { html } from '../@polymer/polymer/lib/utils/html-tag.js';
+class L2tPaperColor extends PolymerElement {
+  static get template() {
+    return html`
+    <style>
+      :host {
+        display: block;
+        width: var(--l2t-paper-color-width, 120px);
+      }
+      :host([hidden]) {
+        display: none;
+      }
+      iron-icon[slot=prefix] {
+        fill: var(--l2t-paper-color-indicator-icon, transparent);
+        display: var(--l2t-paper-color-indicator-icon-display, none);;
+      }
+    </style>
+    <paper-input on-focus="_openDialog" label\$="[[label]]" disabled\$="[[disabled]]" readonly\$="[[readonly]]" required\$="[[required]]" value\$="[[value]]" no-label-float\$="[[noLabelFloat]]" always-float-label\$="[[alwaysFloatLabel]]">
+      <iron-icon icon="label" slot="prefix"></iron-icon>
+      <iron-icon icon="image:palette" slot="suffix"></iron-icon>
+    </paper-input>
+`;
+  }
+
+  static get is() { return 'l2t-paper-color'; }
+  static get properties() {
+    return {
+      /**
+      * label: string to store hex color value
+      */
+      label: {
+        type: String,
+        value: "Color select"
+      },
+      /**
+      * disabled: boolean input diabled
+      */
+      disabled: {
+        type: Boolean,
+        value: false
+      },
+      /**
+      * readonly: boolena input read only
+      */
+      readonly: {
+        type: Boolean,
+        value: false
+      },
+      /**
+      * value: string to value of input
+      */
+      value: {
+        type: String,
+        notify: true,
+        observer: "_colorUpdate"
+      },
+      /**
+      * no-label-float: boolean remove label when value contains text
+      */
+      noLabelFloat: {
+        type: Boolean,
+        value: false
+      },
+      /**
+      * always-float-label: boolean label always in float position
+      */
+      alwaysFloatLabel: {
+        type: Boolean,
+        value: false
+      },
+      /**
+      * colors: array to store list of colors
+      */
+      colors: {
+        type: Array
+      },
+      /**
+      * hideAdvanced: boolean to hide advance button
+      */
+      hideAdvanced: {
+        type: Boolean,
+        value: false
+      }
+    };
+  }
+  /**
+  * _colorUpdate: updates styles to match value
+  */
+  _colorUpdate() {
+    if(this.value){
+      this.updateStyles({
+        '--l2t-paper-color-indicator-icon': this.value,
+        '--l2t-paper-color-indicator-icon-display': 'block',
+      });
+    } else {
+      this.updateStyles({
+        '--l2t-paper-color-indicator-icon': 'transparent',
+        '--l2t-paper-color-indicator-icon-display': 'none',
+      });
+    }
+  }
+  /**
+  * _createDialog: create dialog on first request
+  */
+  _createDialog() {
+    this.colorDialog = document.createElement('l2t-paper-color-dialog');
+    document.body.appendChild(this.colorDialog);
+  }
+  /**
+  * _dialogHandler: if dialog is confirmed update value
+  */
+  _dialogHandler(e) {
+    if(e.detail) {
+      this.value = this.colorDialog.color;
+      this.dispatchEvent(new CustomEvent('change'));
+    }
+  }
+  /**
+  * _openDialog: open dialog if not readonly
+  */
+  _openDialog() {
+    if(this.readonly)
+      return
+
+    this.colorDialog.color = this.value||this.colorDialog.color;
+    this.colorDialog.colors = this.colors||this.colorDialog.colors;
+    this.colorDialog.hideAdvanced = this.hideAdvanced;
+    this.colorDialog.open();
+  }
+  ready(){
+    super.ready();
+    this._createDialog();
+    this.colorDialog.addEventListener("paper-color-dialog-closed", (e) => this._dialogHandler(e), false);
+  }
+}
+
+window.customElements.define(L2tPaperColor.is, L2tPaperColor);
